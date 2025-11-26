@@ -58,7 +58,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        rust-version: ['1.86']
+        rust-version: ['1.90']
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -147,9 +147,24 @@ jobs:
 
       - name: Install Helm unittest plugin
         run: helm plugin install https://github.com/helm-unittest/helm-unittest.git --verify=false
+        continue-on-error: true
 
       - name: Run Helm unit tests
-        run: helm unittest k8s/chart
+        run: helm unittest k8s/chart --output-type JUnit --output-file helm-test-results.xml
+
+      - name: Publish Helm Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always()
+        with:
+          files: helm-test-results.xml
+          check_name: Helm Unit Test Results
+
+      - name: Upload Helm Test Results
+        uses: actions/upload-artifact@v5
+        if: always()
+        with:
+          name: helm-test-results
+          path: helm-test-results.xml
 
       - name: Lint Helm chart
         run: helm lint k8s/chart
