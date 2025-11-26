@@ -1,0 +1,8 @@
+env:
+  variables:
+    PORT: "8080"
+    RUST_LOG: "info"
+    RUST_ENV: "test"
+extraEnv:
+  CORS_ORIGIN: "*"
+  APP_VERSION: "0.0.1"
