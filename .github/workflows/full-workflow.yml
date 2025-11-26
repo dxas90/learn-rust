@@ -10,7 +10,7 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
-  RUST_VERSION: '1.83'
+  RUST_VERSION: '1.86'
   APP_NAME: learn-rust
   CLUSTER_NAME: test-cluster
 
@@ -57,7 +57,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        rust-version: ['1.83']
+        rust-version: ['1.86']
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -382,4 +382,3 @@ jobs:
         if: success()
         run: |
           echo "Triggering FluxCD reconciliation for production..."
-

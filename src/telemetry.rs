@@ -1,22 +1,25 @@
 #[cfg(feature = "telemetry")]
 use opentelemetry::global;
 #[cfg(feature = "telemetry")]
-use opentelemetry_sdk::{runtime, Resource};
-#[cfg(feature = "telemetry")]
 use opentelemetry_otlp::WithExportConfig;
+#[cfg(feature = "telemetry")]
+use opentelemetry_sdk::{runtime, Resource};
 
 #[cfg(feature = "telemetry")]
 pub fn init_tracer() -> Result<(), Box<dyn std::error::Error>> {
     // Check if OTEL endpoint is configured
-    let otlp_endpoint = std::env::var("OTEL_EXPORTER_OTLP_ENDPOINT")
-        .unwrap_or_else(|_| String::new());
+    let otlp_endpoint =
+        std::env::var("OTEL_EXPORTER_OTLP_ENDPOINT").unwrap_or_else(|_| String::new());
 
     if otlp_endpoint.is_empty() {
         tracing::info!("[INFO] OpenTelemetry: OTEL_EXPORTER_OTLP_ENDPOINT not set, skipping OTLP configuration");
         return Ok(());
     }
 
-    tracing::info!("[INFO] OpenTelemetry: Configuring OTLP exporter with endpoint: {}", otlp_endpoint);
+    tracing::info!(
+        "[INFO] OpenTelemetry: Configuring OTLP exporter with endpoint: {}",
+        otlp_endpoint
+    );
 
     use opentelemetry_otlp::SpanExporter;
     use opentelemetry_sdk::trace::TracerProvider;

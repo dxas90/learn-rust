@@ -57,7 +57,7 @@ cargo tarpaulin --out Html --output-dir coverage
 **Single pipeline - streamlined for efficiency**
 
 ```
-lint → test (matrix: 1.83) → build → helm-test
+lint → test (matrix: 1.86) → build → helm-test
         ↓                      ↓
   security-scan          (artifact)
                               ↓
@@ -153,7 +153,7 @@ let port = std::env::var("PORT").unwrap_or_else(|_| "8080".to_string());
 
 ### Docker Build (Dockerfile)
 ```dockerfile
-# Stage 1: rust:1.83-alpine → builds release binary
+# Stage 1: rust:1.86-alpine → builds release binary
 # Stage 2: alpine:3.21 → minimal runtime (~20MB image)
 EXPOSE 8080  # Container listens on 8080
 ```

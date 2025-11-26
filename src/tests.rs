@@ -8,15 +8,15 @@ mod tests {
         routing::{get, post},
         Router,
     };
-    use std::sync::Arc;
-    use tower::ServiceExt;
     use http_body_util::BodyExt;
     use serde_json::Value;
+    use std::sync::Arc;
+    use tower::ServiceExt;
 
     async fn setup_app() -> Router {
         // Initialize metrics for tests
         crate::metrics::init_metrics();
-        
+
         let state = Arc::new(AppState::new("0.0.1".to_string(), "test".to_string()));
 
         Router::new()
@@ -62,7 +62,12 @@ mod tests {
         let app = setup_app().await;
 
         let response = app
-            .oneshot(Request::builder().uri("/healthz").body(Body::empty()).unwrap())
+            .oneshot(
+                Request::builder()
+                    .uri("/healthz")
+                    .body(Body::empty())
+                    .unwrap(),
+            )
             .await
             .unwrap();
 
@@ -86,7 +91,12 @@ mod tests {
         let app = setup_app().await;
 
         let response = app
-            .oneshot(Request::builder().uri("/version").body(Body::empty()).unwrap())
+            .oneshot(
+                Request::builder()
+                    .uri("/version")
+                    .body(Body::empty())
+                    .unwrap(),
+            )
             .await
             .unwrap();
 
@@ -128,7 +138,7 @@ mod tests {
 
         let body = response.into_body().collect().await.unwrap().to_bytes();
         let body_str = String::from_utf8(body.to_vec()).unwrap();
-        
+
         // Check for prometheus metrics format
         assert!(body_str.contains("http_requests_total"));
         assert!(body_str.contains("http_request_duration_seconds"));

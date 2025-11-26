@@ -1,9 +1,4 @@
-use axum::{
-    extract::State,
-    http::StatusCode,
-    response::IntoResponse,
-    Json,
-};
+use axum::{extract::State, http::StatusCode, response::IntoResponse, Json};
 use std::sync::Arc;
 use sysinfo::System;
 
@@ -74,7 +69,9 @@ pub async fn healthz(State(state): State<Arc<AppState>>) -> impl IntoResponse {
     let mut sys = System::new_all();
     sys.refresh_all();
 
-    let uptime = state.start_time.elapsed()
+    let uptime = state
+        .start_time
+        .elapsed()
         .map(|d| d.as_secs_f64())
         .unwrap_or(0.0);
 
@@ -112,7 +109,9 @@ pub async fn info(State(state): State<Arc<AppState>>) -> impl IntoResponse {
     let mut sys = System::new_all();
     sys.refresh_all();
 
-    let uptime = state.start_time.elapsed()
+    let uptime = state
+        .start_time
+        .elapsed()
         .map(|d| d.as_secs_f64())
         .unwrap_or(0.0);
 

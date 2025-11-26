@@ -9,9 +9,9 @@ use tracing::info;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 mod handlers;
+mod metrics;
 mod middleware;
 mod models;
-mod metrics;
 mod telemetry;
 
 #[cfg(test)]
@@ -73,8 +73,14 @@ async fn main() {
     // Build address
     let addr = format!("{}:{}", host, port);
     info!("🚀 Server starting at http://{}/", addr);
-    info!("📊 Environment: {}", std::env::var("RUST_ENV").unwrap_or_else(|_| "development".to_string()));
-    info!("📦 Version: {}", std::env::var("APP_VERSION").unwrap_or_else(|_| "0.0.1".to_string()));
+    info!(
+        "📊 Environment: {}",
+        std::env::var("RUST_ENV").unwrap_or_else(|_| "development".to_string())
+    );
+    info!(
+        "📦 Version: {}",
+        std::env::var("APP_VERSION").unwrap_or_else(|_| "0.0.1".to_string())
+    );
     info!("🕐 Started at: {}", chrono::Utc::now().to_rfc3339());
 
     // Create listener
@@ -86,7 +92,7 @@ async fn main() {
 
     // Start server with graceful shutdown
     let server = axum::serve(listener, app);
-    
+
     // Handle graceful shutdown
     let shutdown_signal = async {
         tokio::signal::ctrl_c()
