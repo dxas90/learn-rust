@@ -13,7 +13,7 @@ COPY Cargo.toml Cargo.lock* ./
 RUN mkdir src && \
     echo "fn main() {}" > src/main.rs && \
     cargo build --release || true && \
-    rm -rf src
+    rm -rf src target
 
 # Copy source code
 COPY src ./src
@@ -23,7 +23,7 @@ RUN cargo build --release && \
     strip target/release/learn-rust
 
 # Runtime stage
-FROM alpine:3.21
+FROM alpine:3.21 as production
 
 # Install runtime dependencies
 RUN apk add --no-cache ca-certificates tzdata wget
