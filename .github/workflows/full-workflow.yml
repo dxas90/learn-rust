@@ -158,6 +158,9 @@ jobs:
     name: Build and Scan Docker Image
     runs-on: ubuntu-latest
     needs: [lint, test]
+    strategy:
+      matrix:
+        platform: [linux/amd64, linux/arm64]
     permissions:
       contents: read
       packages: write
@@ -199,26 +202,26 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          platforms: linux/amd64,linux/arm64
+          platforms: ${{ matrix.platform }}
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=${{ matrix.platform }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.platform }}
           build-args: |
             BUILD_DATE=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.created'] }}
             VCS_REF=${{ github.sha }}
             VERSION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
 
       - name: Extract SHA tag for Trivy
-        if: github.event_name != 'pull_request'
+        if: github.event_name != 'pull_request' && matrix.platform == 'linux/amd64'
         id: extract-sha-tag
         run: |
           echo "sha-tag=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
           echo "Found SHA tag: ${SHA_TAG}"
 
       - name: Run Trivy vulnerability scanner
-        if: github.event_name != 'pull_request'
+        if: github.event_name != 'pull_request' && matrix.platform == 'linux/amd64'
         id: trivy
         continue-on-error: true
         uses: aquasecurity/trivy-action@0.33.1
@@ -247,17 +250,20 @@ jobs:
           config: .github/kind-config.yaml
 
       - name: Load Docker image into Kind
+        if: matrix.platform == 'linux/amd64'
         run: |
           docker pull --platform linux/amd64 ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${GITHUB_SHA::7}
           kind load docker-image ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${GITHUB_SHA::7} --name ${{ env.CLUSTER_NAME }}
 
       - name: Wait for cluster to be ready
+        if: matrix.platform == 'linux/amd64'
         run: |
           echo "Waiting for nodes to be ready..."
           kubectl wait --for=condition=Ready nodes --all --timeout=300s
           echo "Cluster is ready!"
 
       - name: Display cluster information
+        if: matrix.platform == 'linux/amd64'
         run: |
           echo "=== Cluster Info ==="
           kubectl cluster-info
@@ -269,6 +275,7 @@ jobs:
           kubectl get services --all-namespaces -o wide
 
       - name: Deploy application using Helm
+        if: matrix.platform == 'linux/amd64'
         run: |
           echo "Deploying application with Helm..."
 
@@ -293,18 +300,21 @@ jobs:
           kubectl get services
 
       - name: Run Smoke Test
+        if: matrix.platform == 'linux/amd64'
         run: |
           echo "Running quick smoke test..."
           chmod +x scripts/smoke-test.sh
           ./scripts/smoke-test.sh
 
       - name: Run Comprehensive E2E Tests
+        if: matrix.platform == 'linux/amd64'
         run: |
           echo "Starting comprehensive end-to-end testing..."
           chmod +x scripts/e2e-test.sh
           ./scripts/e2e-test.sh
 
       - name: Verify Deployment Health
+        if: matrix.platform == 'linux/amd64'
         run: |
           echo "=== Final Deployment Health Check ==="
           UNHEALTHY_PODS=$(kubectl get pods --field-selector=status.phase!=Running --no-headers | wc -l)
@@ -316,7 +326,7 @@ jobs:
           echo "✅ All deployment health checks passed!"
 
       - name: Collect Logs and Debug Info
-        if: failure()
+        if: failure() && matrix.platform == 'linux/amd64'
         run: |
           echo "=== COLLECTING DEBUG INFORMATION ==="
           echo "--- Cluster Information ---"
@@ -339,7 +349,7 @@ jobs:
           kubectl get events --sort-by='.metadata.creationTimestamp'
 
       - name: Cleanup
-        if: always()
+        if: always() && matrix.platform == 'linux/amd64'
         run: |
           echo "Cleaning up resources..."
           helm uninstall ${{ env.APP_NAME }} --ignore-not-found || true
