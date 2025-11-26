@@ -49,7 +49,7 @@ opentelemetry_sdk = { version = "0.27", features = ["rt-tokio"], optional = true
 tracing-opentelemetry = { version = "0.28", optional = true }
 
 # Prometheus metrics
-prometheus = { version = "0.13", features = ["process"], optional = true }
+prometheus = { version = "0.14", features = ["process"], optional = true }
 
 [dev-dependencies]
 tower = { version = "0.5", features = ["util"] }
