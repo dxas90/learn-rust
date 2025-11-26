@@ -10,9 +10,10 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
-  RUST_VERSION: '1.86'
+  RUST_VERSION: '1.90'
   APP_NAME: learn-rust
   CLUSTER_NAME: test-cluster
+  CARGO_TARGET_DIR: ./target
 
 jobs:
   lint:
@@ -93,9 +94,6 @@ jobs:
         with:
           toolchain: 'nightly'
           components: rustfmt
-
-      - name: Set CARGO_TARGET_DIR for coverage
-        run: echo "CARGO_TARGET_DIR=./target" >> $GITHUB_ENV
 
       - name: Install cargo-tarpaulin
         run: cargo install cargo-tarpaulin
