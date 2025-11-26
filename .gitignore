@@ -82,5 +82,4 @@ config/local.yml
 !pkg/
 !scripts/
 
-flux-git-deploy-key
-flux-git-deploy-key.pub
+cobertura.xml
