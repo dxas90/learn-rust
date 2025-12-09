@@ -16,14 +16,14 @@ ENV CARGO_INCREMENTAL=0 \
 # Create a dummy main.rs to build dependencies
 RUN mkdir src && \
     echo "fn main() {}" > src/main.rs && \
-    cargo build --release --locked || true && \
+    cargo build --release || true && \
     rm -rf src target
 
 # Copy source code
 COPY src ./src
 
 # Build application with optimizations
-RUN cargo build --release --locked && \
+RUN cargo build --release && \
     strip target/release/learn-rust
 
 # Runtime stage
