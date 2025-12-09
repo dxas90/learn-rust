@@ -9,17 +9,21 @@ WORKDIR /app
 # Copy manifests
 COPY Cargo.toml Cargo.lock* ./
 
+# Set environment variables
+ENV CARGO_INCREMENTAL=0 \
+    CARGO_PROFILE_TEST_DEBUG=0
+
 # Create a dummy main.rs to build dependencies
 RUN mkdir src && \
     echo "fn main() {}" > src/main.rs && \
-    cargo build --release || true && \
+    cargo build --release --locked || true && \
     rm -rf src target
 
 # Copy source code
 COPY src ./src
 
 # Build application with optimizations
-RUN cargo build --release && \
+RUN cargo build --release --locked && \
     strip target/release/learn-rust
 
 # Runtime stage
