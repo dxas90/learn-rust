@@ -12,6 +12,7 @@ mod handlers;
 mod metrics;
 mod middleware;
 mod models;
+mod openapi;
 mod telemetry;
 
 #[cfg(test)]
@@ -19,6 +20,16 @@ mod tests;
 
 use handlers::*;
 use models::AppState;
+
+/// OpenAPI specification handler
+async fn openapi_handler() -> impl axum::response::IntoResponse {
+    use axum::http::StatusCode;
+    (
+        StatusCode::OK,
+        [("content-type", "application/json")],
+        openapi::get_openapi_json(),
+    )
+}
 
 #[tokio::main]
 async fn main() {
@@ -64,6 +75,7 @@ async fn main() {
         .route("/version", get(version_handler))
         .route("/echo", post(echo))
         .route("/metrics", get(metrics::metrics_handler))
+        .route("/openapi.json", get(openapi_handler))
         .layer(cors)
         .layer(TraceLayer::new_for_http())
         .layer(axum::middleware::from_fn(middleware::security_headers))

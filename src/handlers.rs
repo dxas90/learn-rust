@@ -1,10 +1,19 @@
 use axum::{extract::State, http::StatusCode, response::IntoResponse, Json};
 use std::sync::Arc;
 use sysinfo::System;
+use utoipa;
 
 use crate::models::*;
 
 /// Root endpoint handler - Returns welcome message with API documentation
+#[utoipa::path(
+    get,
+    path = "/",
+    responses(
+        (status = 200, description = "Welcome message with API endpoints", body = ApiResponse<WelcomeData>)
+    ),
+    tag = "info"
+)]
 pub async fn index(State(_state): State<Arc<AppState>>) -> impl IntoResponse {
     let welcome = WelcomeData {
         message: "Welcome to learn-rust API".to_string(),
@@ -53,6 +62,11 @@ pub async fn index(State(_state): State<Arc<AppState>>) -> impl IntoResponse {
                 method: "GET".to_string(),
                 description: "Prometheus metrics endpoint".to_string(),
             },
+            Endpoint {
+                path: "/openapi.json".to_string(),
+                method: "GET".to_string(),
+                description: "OpenAPI specification".to_string(),
+            },
         ],
     };
 
@@ -60,11 +74,27 @@ pub async fn index(State(_state): State<Arc<AppState>>) -> impl IntoResponse {
 }
 
 /// Ping endpoint - Simple health check
+#[utoipa::path(
+    get,
+    path = "/ping",
+    responses(
+        (status = 200, description = "Pong response", body = String, content_type = "text/plain")
+    ),
+    tag = "health"
+)]
 pub async fn ping() -> impl IntoResponse {
     (StatusCode::OK, "pong")
 }
 
 /// Health check endpoint - Returns detailed health information
+#[utoipa::path(
+    get,
+    path = "/healthz",
+    responses(
+        (status = 200, description = "Health status with system metrics", body = ApiResponse<HealthData>)
+    ),
+    tag = "health"
+)]
 pub async fn healthz(State(state): State<Arc<AppState>>) -> impl IntoResponse {
     let mut sys = System::new_all();
     sys.refresh_all();
@@ -105,6 +135,14 @@ pub async fn healthz(State(state): State<Arc<AppState>>) -> impl IntoResponse {
 }
 
 /// Info endpoint - Returns application and system information
+#[utoipa::path(
+    get,
+    path = "/info",
+    responses(
+        (status = 200, description = "Detailed system and application info", body = ApiResponse<InfoData>)
+    ),
+    tag = "info"
+)]
 pub async fn info(State(state): State<Arc<AppState>>) -> impl IntoResponse {
     let mut sys = System::new_all();
     sys.refresh_all();
@@ -150,6 +188,14 @@ pub async fn info(State(state): State<Arc<AppState>>) -> impl IntoResponse {
 }
 
 /// Version endpoint - Returns version information
+#[utoipa::path(
+    get,
+    path = "/version",
+    responses(
+        (status = 200, description = "Application version information", body = ApiResponse<VersionData>)
+    ),
+    tag = "info"
+)]
 pub async fn version_handler(State(state): State<Arc<AppState>>) -> impl IntoResponse {
     let version = VersionData {
         version: state.app_info.version.clone(),
@@ -161,6 +207,16 @@ pub async fn version_handler(State(state): State<Arc<AppState>>) -> impl IntoRes
 }
 
 /// Echo endpoint - Echoes back the request body
+#[utoipa::path(
+    post,
+    path = "/echo",
+    request_body = EchoRequest,
+    responses(
+        (status = 200, description = "Echoed request data", body = ApiResponse<EchoResponse>),
+        (status = 400, description = "Invalid request body")
+    ),
+    tag = "utility"
+)]
 pub async fn echo(Json(payload): Json<EchoRequest>) -> impl IntoResponse {
     let response = EchoResponse {
         message: payload.message,

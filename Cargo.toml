@@ -51,6 +51,10 @@ tracing-opentelemetry = { version = "0.28", optional = true }
 # Prometheus metrics
 prometheus = { version = "0.14", features = ["process"], optional = true }
 
+# OpenAPI documentation
+utoipa = { version = "5.2", features = ["axum_extras", "chrono"] }
+utoipa-axum = "0.1"
+
 [dev-dependencies]
 tower = { version = "0.5", features = ["util"] }
 http-body-util = "0.1"
