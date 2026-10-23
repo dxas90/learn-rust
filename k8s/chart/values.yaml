@@ -84,7 +84,7 @@ common:
 # Other values from the original chart are intentionally left as defaults.
 serviceAccount:
   create: true
-  automount: true
+  automount: false
   annotations: {}
   name: ""
   projectedToken:
@@ -133,14 +133,6 @@ volumes:
   - name: app-cache
     emptyDir: {}
 
-# PriorityClass is disabled by default.
-priorityClass:
-  enabled: false
-  name: ""
-  value: 1000000
-  globalDefault: false
-  preemptionPolicy: "PreemptLowerPriority"
-  description: "Priority class for learn-rust pods"
 
 # PodDisruptionBudget for high availability
 podDisruptionBudget:
