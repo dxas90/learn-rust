@@ -4,5 +4,14 @@ description: "Helm chart for learn-rust API"
 type: application
 version: "0.1.0" # {"$imagepolicy": "playground:learn-rust-policy:tag"}
 appVersion: "0.1.0" # {"$imagepolicy": "playground:learn-rust-policy:tag"}
+icon: "https://www.rust-lang.org/logos/rust-logo-512x512.png"
+home: "https://github.com/dxas90/learn-rust"
+sources:
+  - "https://github.com/dxas90/learn-rust"
+keywords:
+  - rust
+  - api
+  - systems
+  - kubernetes
 maintainers:
   - name: "Daniel Ramirez <dxas90@gmail.com>"
