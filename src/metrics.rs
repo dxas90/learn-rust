@@ -30,11 +30,14 @@ pub fn init_metrics() {
             .register(Box::new(HTTP_REQUEST_DURATION_SECONDS.clone()))
             .expect("collector can be registered");
 
-        // Register process metrics
-        let process_collector = prometheus::process_collector::ProcessCollector::for_self();
-        REGISTRY
-            .register(Box::new(process_collector))
-            .expect("process collector can be registered");
+        // Register process metrics (Linux only)
+        #[cfg(target_os = "linux")]
+        {
+            let process_collector = prometheus::process_collector::ProcessCollector::for_self();
+            REGISTRY
+                .register(Box::new(process_collector))
+                .expect("process collector can be registered");
+        }
     });
 }
 /// Metrics endpoint handler

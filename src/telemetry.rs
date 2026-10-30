@@ -3,11 +3,14 @@ use opentelemetry::global;
 #[cfg(feature = "telemetry")]
 use opentelemetry_otlp::WithExportConfig;
 #[cfg(feature = "telemetry")]
-use opentelemetry_sdk::{runtime, Resource};
+use opentelemetry_sdk::Resource;
+
+#[cfg(feature = "telemetry")]
+static TRACER_PROVIDER: std::sync::OnceLock<opentelemetry_sdk::trace::SdkTracerProvider> =
+    std::sync::OnceLock::new();
 
 #[cfg(feature = "telemetry")]
 pub fn init_tracer() -> Result<(), Box<dyn std::error::Error>> {
-    // Check if OTEL endpoint is configured
     let otlp_endpoint =
         std::env::var("OTEL_EXPORTER_OTLP_ENDPOINT").unwrap_or_else(|_| String::new());
 
@@ -22,19 +25,20 @@ pub fn init_tracer() -> Result<(), Box<dyn std::error::Error>> {
     );
 
     use opentelemetry_otlp::SpanExporter;
-    use opentelemetry_sdk::trace::TracerProvider;
+    use opentelemetry_sdk::trace::SdkTracerProvider;
 
     let exporter = SpanExporter::builder()
         .with_tonic()
         .with_endpoint(otlp_endpoint)
         .build()?;
 
-    let provider = TracerProvider::builder()
-        .with_batch_exporter(exporter, runtime::Tokio)
-        .with_resource(Resource::default())
+    let provider = SdkTracerProvider::builder()
+        .with_batch_exporter(exporter)
+        .with_resource(Resource::builder().build())
         .build();
 
-    global::set_tracer_provider(provider);
+    global::set_tracer_provider(provider.clone());
+    TRACER_PROVIDER.set(provider).ok();
 
     tracing::info!("[INFO] OpenTelemetry: Tracer initialized successfully");
     Ok(())
@@ -49,6 +53,10 @@ pub fn init_tracer() -> Result<(), Box<dyn std::error::Error>> {
 pub fn shutdown_tracer() {
     #[cfg(feature = "telemetry")]
     {
-        global::shutdown_tracer_provider();
+        if let Some(provider) = TRACER_PROVIDER.get() {
+            if let Err(e) = provider.shutdown() {
+                tracing::warn!("[WARN] OpenTelemetry: Error shutting down tracer: {}", e);
+            }
+        }
     }
 }
