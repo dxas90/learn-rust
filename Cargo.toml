@@ -46,7 +46,7 @@ lazy_static = "1.4"
 opentelemetry = { version = "0.27", optional = true }
 opentelemetry-otlp = { version = "0.27", optional = true }
 opentelemetry_sdk = { version = "0.33", features = ["rt-tokio"], optional = true }
-tracing-opentelemetry = { version = "0.28", optional = true }
+tracing-opentelemetry = { version = "0.34", optional = true }
 
 # Prometheus metrics
 prometheus = { version = "0.14", features = ["process"], optional = true }
