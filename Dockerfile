@@ -27,7 +27,7 @@ RUN cargo build --release && \
     strip target/release/learn-rust
 
 # Runtime stage
-FROM alpine:3.20 AS production
+FROM alpine:3.24 AS production
 
 # Install runtime dependencies
 RUN apk add --no-cache ca-certificates tzdata wget
