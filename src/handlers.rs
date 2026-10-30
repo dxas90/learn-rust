@@ -95,7 +95,7 @@ pub async fn ping() -> impl IntoResponse {
     tag = "health"
 )]
 pub async fn healthz(State(state): State<Arc<AppState>>) -> impl IntoResponse {
-    let mut sys = System::new_all();
+    let mut sys = System::new_all().expect("failed to create sysinfo::System");
     sys.refresh_all();
 
     let uptime = state
@@ -126,7 +126,7 @@ pub async fn healthz(State(state): State<Arc<AppState>>) -> impl IntoResponse {
             os: std::env::consts::OS.to_string(),
             arch: std::env::consts::ARCH.to_string(),
             cpu_count: sys.cpus().len(),
-            hostname: System::host_name().unwrap_or_else(|| "unknown".to_string()),
+            hostname: System::host_name().unwrap_or_else(|_| "unknown".to_string()),
         },
     };
 
@@ -143,7 +143,7 @@ pub async fn healthz(State(state): State<Arc<AppState>>) -> impl IntoResponse {
     tag = "info"
 )]
 pub async fn info(State(state): State<Arc<AppState>>) -> impl IntoResponse {
-    let mut sys = System::new_all();
+    let mut sys = System::new_all().expect("failed to create sysinfo::System");
     sys.refresh_all();
 
     let uptime = state
@@ -166,7 +166,7 @@ pub async fn info(State(state): State<Arc<AppState>>) -> impl IntoResponse {
         system: DetailedSystemInfo {
             os: std::env::consts::OS.to_string(),
             arch: std::env::consts::ARCH.to_string(),
-            hostname: System::host_name().unwrap_or_else(|| "unknown".to_string()),
+            hostname: System::host_name().unwrap_or_else(|_| "unknown".to_string()),
             cpu_count: sys.cpus().len(),
             uptime,
             memory: MemoryInfo {
